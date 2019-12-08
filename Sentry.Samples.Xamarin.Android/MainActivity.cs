@@ -48,6 +48,8 @@ namespace Sentry.Samples.Xamarin.Android
             View view = (View)sender;
             Snackbar.Make(view, "Replace with your own action", Snackbar.LengthLong)
                 .SetAction("Action", (View.IOnClickListener)null).Show();
+            IO.Sentry.Core.Sentry.CaptureMessage("I can capture messages too");
+            IO.Sentry.Core.Sentry.CaptureException(Throwable.FromException(new Exception("Xamarinrinrinrinrin...")));
             throw new Exception("Xamarinrinrinrinrin...");
         }
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] global::Android.Content.PM.Permission[] grantResults)

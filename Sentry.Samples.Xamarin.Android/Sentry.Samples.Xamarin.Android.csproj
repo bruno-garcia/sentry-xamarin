@@ -112,8 +112,12 @@
     <PackageReference Include="Xamarin.Essentials" Version="1.2.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Sentry.Xamarin.Android.Ndk\Sentry.Xamarin.Android.Ndk.csproj">
+      <Project>{5b525ae1-d218-4f30-83ce-3566c1058aa7}</Project>
+      <Name>Sentry.Xamarin.Android.Ndk</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Sentry.Xamarin.Android\Sentry.Xamarin.Android.csproj">
-      <Project>{3BE336B8-40CF-42DE-B5AC-1291015800BB}</Project>
+      <Project>{06C635C0-D7AA-465C-8A84-FBAABA864081}</Project>
       <Name>Sentry.Xamarin.Android</Name>
     </ProjectReference>
   </ItemGroup>

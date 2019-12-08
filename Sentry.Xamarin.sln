@@ -3,9 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Xamarin.Android", "Sentry.Xamarin.Android\Sentry.Xamarin.Android.csproj", "{3BE336B8-40CF-42DE-B5AC-1291015800BB}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Xamarin.Android.Core", "Sentry.Xamarin.Android.Core\Sentry.Xamarin.Android.Core.csproj", "{06C635C0-D7AA-465C-8A84-FBAABA864081}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Xamarin.Android", "Sentry.Xamarin.Android\Sentry.Xamarin.Android.csproj", "{06C635C0-D7AA-465C-8A84-FBAABA864081}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Xamarin.Android.Ndk", "Sentry.Xamarin.Android.Ndk\Sentry.Xamarin.Android.Ndk.csproj", "{5B525AE1-D218-4F30-83CE-3566C1058AA7}"
 EndProject
@@ -24,18 +22,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{3BE336B8-40CF-42DE-B5AC-1291015800BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3BE336B8-40CF-42DE-B5AC-1291015800BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3BE336B8-40CF-42DE-B5AC-1291015800BB}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{3BE336B8-40CF-42DE-B5AC-1291015800BB}.Debug|x64.Build.0 = Debug|Any CPU
-		{3BE336B8-40CF-42DE-B5AC-1291015800BB}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{3BE336B8-40CF-42DE-B5AC-1291015800BB}.Debug|x86.Build.0 = Debug|Any CPU
-		{3BE336B8-40CF-42DE-B5AC-1291015800BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3BE336B8-40CF-42DE-B5AC-1291015800BB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3BE336B8-40CF-42DE-B5AC-1291015800BB}.Release|x64.ActiveCfg = Release|Any CPU
-		{3BE336B8-40CF-42DE-B5AC-1291015800BB}.Release|x64.Build.0 = Release|Any CPU
-		{3BE336B8-40CF-42DE-B5AC-1291015800BB}.Release|x86.ActiveCfg = Release|Any CPU
-		{3BE336B8-40CF-42DE-B5AC-1291015800BB}.Release|x86.Build.0 = Release|Any CPU
 		{06C635C0-D7AA-465C-8A84-FBAABA864081}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{06C635C0-D7AA-465C-8A84-FBAABA864081}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{06C635C0-D7AA-465C-8A84-FBAABA864081}.Debug|x64.ActiveCfg = Debug|Any CPU
