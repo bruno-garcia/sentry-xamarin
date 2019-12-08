@@ -5,13 +5,13 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{3BE336B8-40CF-42DE-B5AC-1291015800BB}</ProjectGuid>
+    <ProjectGuid>{06C635C0-D7AA-465C-8A84-FBAABA864081}</ProjectGuid>
     <ProjectTypeGuids>{10368E6C-D01B-4462-8E8B-01FC667A7035};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <TemplateGuid>{77efb91c-a7e9-4b0e-a7c5-31eeec3c6d46}</TemplateGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Sentry.Xamarin.Android</RootNamespace>
-    <AssemblyName>Sentry.Xamarin.Android</AssemblyName>
+    <RootNamespace>Sentry.Xamarin.Android.Core</RootNamespace>
+    <AssemblyName>Sentry.Xamarin.Android.Core</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkVersion>v9.0</TargetFrameworkVersion>
     <AndroidClassParser>class-parse</AndroidClassParser>
@@ -52,14 +52,13 @@
     <TransformFile Include="Transforms\EnumMethods.xml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Sentry.Xamarin.Android.Core\Sentry.Xamarin.Android.Core.csproj">
-      <Project>{06C635C0-D7AA-465C-8A84-FBAABA864081}</Project>
-      <Name>Sentry.Xamarin.Android.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Sentry.Xamarin.Android.Ndk\Sentry.Xamarin.Android.Ndk.csproj">
-      <Project>{5B525AE1-D218-4F30-83CE-3566C1058AA7}</Project>
-      <Name>Sentry.Xamarin.Android.Ndk</Name>
-    </ProjectReference>
+    <EmbeddedJar Include="Jars\sentry-core-2.0.0-beta01.jar" />
+  </ItemGroup>
+  <ItemGroup>
+    <LibraryProjectZip Include="Jars\sentry-android-core-2.0.0-beta01.aar" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedReferenceJar Include="Jars\gson-2.8.5.jar" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.Bindings.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

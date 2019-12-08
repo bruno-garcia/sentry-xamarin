@@ -113,7 +113,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Sentry.Xamarin.Android\Sentry.Xamarin.Android.csproj">
-      <Project>{1f17c9d5-6ffb-4e74-a953-0f55df462628}</Project>
+      <Project>{3BE336B8-40CF-42DE-B5AC-1291015800BB}</Project>
       <Name>Sentry.Xamarin.Android</Name>
     </ProjectReference>
   </ItemGroup>
