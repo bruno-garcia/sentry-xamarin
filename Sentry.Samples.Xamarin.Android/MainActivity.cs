@@ -24,6 +24,20 @@ namespace Sentry.Samples.Xamarin.Android
             global::Android.Support.V7.Widget.Toolbar toolbar = FindViewById<global::Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
             SetSupportActionBar(toolbar);
 
+            // TODO: double check but SDK calls .getApplicationContext so we can pass 'this' here instead.
+            SentrySdk.Init(this, o =>
+            {
+                o.Dsn = new Dsn("https://bla@sentry.io/123");
+                o.Debug = true;
+                o.Release = "test-release";
+                o.BeforeSend = @event =>
+                {
+                    @event.SetTag("BeforeSend", "was called");
+                    return @event;
+                };
+                o.AddEventProcessor(new TestProcessor());
+            });
+
             FloatingActionButton fab = FindViewById<FloatingActionButton>(Resource.Id.fab);
             fab.Click += FabOnClick;
         }
@@ -62,18 +76,7 @@ namespace Sentry.Samples.Xamarin.Android
                 .SetAction("Action", (View.IOnClickListener)null).Show();
 //            throw new Exception("Xamarinrinrinrinrin...");
 //            IO.Sentry.Core.Hub
-            SentrySdk.Init(o =>
-            {
-                o.Dsn = new Dsn("https://bla@sentry.io/123");
-                o.Debug = true;
-                o.Release = "test-release";
-                o.BeforeSend = @event =>
-                {
-                    @event.SetTag("BeforeSend", "was called");
-                    return @event;
-                };
-                o.AddEventProcessor(new TestProcessor());
-            });
+
 
             SentrySdk.ConfigureScope(s => s.SetTag("ConfigureScope right after init", "Xam"));
             SentrySdk.CaptureMessage("first message");

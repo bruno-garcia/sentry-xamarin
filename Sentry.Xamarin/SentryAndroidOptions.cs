@@ -4,7 +4,6 @@ namespace Sentry
 {
     public class SentryAndroidOptions : SentryOptions
     {
-        public Context Context { get; set; }
         public bool AnrEnabled { get; set; }
 
         // Hide some  properties that are irrelevant here?

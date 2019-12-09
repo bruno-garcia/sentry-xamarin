@@ -33,19 +33,21 @@ namespace Sentry
 
         public void ConfigureScope(Action<Scope> configureScope)
         {
-            _androidHub.ConfigureScope(new ScopeCallback(configureScope));
+            _androidHub.ConfigureScope(new ScopeCallback() { Action = configureScope});
         }
 
         private class ScopeCallback : Java.Lang.Object, IScopeCallback
         {
-            private readonly Action<Scope> _callback;
-
-            public ScopeCallback(Action<Scope> callback) =>
-                _callback = callback ?? throw new ArgumentNullException(nameof(callback));
+            public Action<Scope> Action { private get; set; }
+//            private readonly Action<Scope> _callback;
+//
+//            public ScopeCallback(Action<Scope> callback) =>
+//                _callback = callback ?? throw new ArgumentNullException(nameof(callback));
 
             public void Dispose()
             {
-                throw new NotImplementedException();
+                // TODO: What do I need to dispose here?
+//                throw new NotImplementedException();
             }
 
             public IntPtr Handle { get; }
@@ -55,7 +57,7 @@ namespace Sentry
                 // TODO: Scope conversion extension method
                 // javaScope.ToDotnet();
                 var dotnetScope = new Scope();
-                _callback(dotnetScope);
+                Action(dotnetScope);
                 // TODO: Make an extension method to apply scope between Java and dotnet objects
                 // dotnetScope.ApplyToJava(javaScope);
 
@@ -90,14 +92,15 @@ namespace Sentry
             _androidHub.BindClient(wrapper);
         }
 
-        public IDisposable PushScope() => new PopScopeDisposable(_androidHub);
+        public IDisposable PushScope() => new PopScopeDisposable {Hub = _androidHub};
 
         private class PopScopeDisposable : IDisposable
         {
-            private readonly IO.Sentry.Core.IHub _hub;
-            public PopScopeDisposable(IO.Sentry.Core.IHub hub) => _hub = hub;
+//            private readonly IO.Sentry.Core.IHub _hub;
+//            public PopScopeDisposable(IO.Sentry.Core.IHub hub) => _hub = hub;
+            public IO.Sentry.Core.IHub Hub { get; set; }
 
-            public void Dispose() => _hub.PopScope();
+            public void Dispose() => Hub.PopScope();
         }
 
         public IDisposable PushScope<TState>(TState state)
@@ -108,10 +111,10 @@ namespace Sentry
             // TODO: Extra in .NET has object as value and serializes whatever you give it.
             // TODO: Just calling ToString here which is not ideal
             _androidHub.SetExtra("some-key-based-on-state", state.ToString());
-            return new PopScopeDisposable(_androidHub);
+            return new PopScopeDisposable() { Hub = _androidHub};
         }
 
-        public void WithScope(Action<Scope> scopeCallback) => _androidHub.WithScope(new ScopeCallback(scopeCallback));
+        public void WithScope(Action<Scope> scopeCallback) => _androidHub.WithScope(new ScopeCallback(){Action = scopeCallback});
 
         // TODO: Might blow up because parsing without dashes
         // TODO: Use ParseExact if it does

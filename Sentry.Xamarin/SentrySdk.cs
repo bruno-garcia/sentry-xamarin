@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using Android.Content;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
@@ -40,7 +41,7 @@ namespace Sentry
         /// <remarks>
         /// If the DSN is not found, the SDK will not change state.
         /// </remarks>
-        public static void Init() => Init(DsnLocator.FindDsnStringOrDisable());
+        public static void Init(Context context) => Init(context, DsnLocator.FindDsnStringOrDisable());
 
         /// <summary>
         /// Initializes the SDK with the specified DSN
@@ -50,30 +51,33 @@ namespace Sentry
         /// </remarks>
         /// <seealso href="https://docs.sentry.io/clientdev/overview/#usage-for-end-users"/>
         /// <param name="dsn">The dsn</param>
-        public static void Init(string dsn)
+        public static void Init(Context context, string dsn)
         {
             if (string.IsNullOrWhiteSpace(dsn))
             {
-                Init(c => c.Dsn = new Dsn(dsn));
+                Init(context, c =>
+                {
+                    c.Dsn = new Dsn(dsn);
+                });
             }
         }
-
-        /// <summary>
-        /// Initializes the SDK with the specified DSN
-        /// </summary>
-        /// <param name="dsn">The dsn</param>
-        public static void Init(Dsn dsn) => Init(c => c.Dsn = dsn);
+// Doesnt' make sense in Android (needs Context) and I'd like to hide the Dsn class
+//        /// <summary>
+//        /// Initializes the SDK with the specified DSN
+//        /// </summary>
+//        /// <param name="dsn">The dsn</param>
+//        public static void Init(Dsn dsn) => Init(c => c.Dsn = dsn);
 
         /// <summary>
         /// Initializes the SDK with an optional configuration options callback.
         /// </summary>
         /// <param name="configureOptions">The configure options.</param>
-        public static void Init(Action<SentryAndroidOptions> configureOptions)
+        public static void Init(Context context, Action<SentryAndroidOptions> configureOptions)
         {
             var options = new SentryAndroidOptions();
             configureOptions?.Invoke(options);
 
-            Init(options);
+            Init(context, options);
         }
 
         /// <summary>
@@ -85,7 +89,7 @@ namespace Sentry
         /// </remarks>
         /// <returns>A disposable to close the SDK.</returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public static void Init(SentryAndroidOptions options)
+        public static void Init(Context context, SentryAndroidOptions options)
         {
             if (options.Dsn == null)
             {
@@ -102,18 +106,47 @@ namespace Sentry
             // options.ReportAssemblies = true;
             // TODO: How am I hooking my Hub adapter if I"m integrating at this level?
             // Luckily Sentry.java is a thing layer, as is this one and it would be simple to replicate in C#
-            // IO.Sentry.Android.Core.SentryAndroid.Init(options.Context, new JavaOptionsCallback(options));
 
             // AndroidOptionsInitializer would need to be exposed. EventProcessors and Integrations would need to communicate
             // TODO: Interlocked.CompareExchange, [ThreadLocal] and copy on read
-            _hub = new AndroidHub(new IO.Sentry.Core.Hub(options.ToJavaAndroidOptions()));
+            var javaOptions = options.ToJavaAndroidOptions();
+            // This wouldnt need to be done here if AndroidOptionsInitializer was made public
+            // All integrations were made internal in the last API review. Could stay like that if we exposed AndroidOptionsInitializer
+            // javaOptions.AddIntegration(new IO.Sentry.Android.Core.AnrIntegration());
+            // javaOptions.AddIntegration(new  IO.Sentry.Android.Core.DefaultAndroidEventProcessor());
+            // Hack just to take the default Android options stuff into the object
+            var callback = new JavaOptionsCallback() {DotnetOptions = options};
+            IO.Sentry.Android.Core.SentryAndroid.Init(context, callback);
+            IO.Sentry.Core.Sentry.Close(); // TODO: Leave it open to allow Java code to use Sentry.capture?
+
+            // TODO: This would go away and the original instance passed to the client's callback would contain all defaults.
+            Apply(callback.AndroidOptions, javaOptions);
+
+            _hub = new AndroidHub(new IO.Sentry.Core.Hub(javaOptions));
+        }
+
+        private static void Apply(
+            // The default stuff (like what SentryAndroid/AndroidOptionsInitializer set to the options
+            IO.Sentry.Android.Core.SentryAndroidOptions source,
+            // What the user's callback created. Ideally he'd received the source instance and mutate but can't until java SDK is changed.
+            IO.Sentry.Android.Core.SentryAndroidOptions target)
+        {
+            // TODO: Applies data from the source to target
+            foreach (var integration in source.Integrations)
+            {
+                target.AddIntegration(integration);
+            }
         }
 
         private class JavaOptionsCallback : Object, IO.Sentry.Core.Sentry.IOptionsConfiguration
         {
-            private readonly SentryAndroidOptions _o;
+            // Huge hack to test things before adapting the Java SDK to expose what we need here
+            public IO.Sentry.Android.Core.SentryAndroidOptions AndroidOptions { get; private set; }
 
-            public JavaOptionsCallback(SentryAndroidOptions o) => _o = o;
+            public SentryAndroidOptions DotnetOptions { private get; set; }
+
+            // Need parameterless ctor
+//            public JavaOptionsCallback(SentryAndroidOptions o) => _o = o;
 
             public void Dispose()
             {
@@ -126,7 +159,9 @@ namespace Sentry
             {
                 // This would make sense if we were to use Java's init
                 var o = (IO.Sentry.Android.Core.SentryAndroidOptions) p0;
-                _o.Apply(o);
+                // Steal the reference
+                AndroidOptions = o;
+                DotnetOptions.Apply(o);
             }
         }
 
@@ -147,16 +182,23 @@ namespace Sentry
             javaOptions.Debug = options.Debug;
             javaOptions.Release = options.Release;
             javaOptions.Environment = options.Environment;
-            javaOptions.BeforeSend = new BeforeSendCallback(options.BeforeSend);
+            var callback = new BeforeSendCallback {BeforeSend = options.BeforeSend};
+            javaOptions.BeforeSend = callback;
+
             javaOptions.AnrEnabled = options.AnrEnabled;
         }
 
         private class BeforeSendCallback : Object,  IO.Sentry.Core.SentryOptions.IBeforeSendCallback
         {
-            private readonly Func<SentryEvent, SentryEvent> _callback;
+            private
+//                readonly
+                Func<SentryEvent, SentryEvent> _callback;
 
-            public BeforeSendCallback(Func<SentryEvent, SentryEvent> callback) =>
-                _callback = callback ?? throw new ArgumentNullException(nameof(callback));
+            public Func<SentryEvent, SentryEvent> BeforeSend { set => _callback = value; }
+
+            // TODO: Can't have a ctor with parameter?
+//            public BeforeSendCallback(Func<SentryEvent, SentryEvent> callback) =>
+//                _callback = callback ?? throw new ArgumentNullException(nameof(callback));
 
             public void Dispose()
             {
