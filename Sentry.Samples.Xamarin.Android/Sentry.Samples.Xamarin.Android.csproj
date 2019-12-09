@@ -112,9 +112,13 @@
     <PackageReference Include="Xamarin.Essentials" Version="1.2.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Sentry.Xamarin.Android\Sentry.Xamarin.Android.csproj">
-      <Project>{1f17c9d5-6ffb-4e74-a953-0f55df462628}</Project>
-      <Name>Sentry.Xamarin.Android</Name>
+    <ProjectReference Include="..\..\sentry-dotnet-protocol\src\Sentry.Protocol\Sentry.Protocol.csproj">
+      <Project>{80152d90-996e-4420-aa68-a9018d026d1f}</Project>
+      <Name>Sentry.Protocol</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Sentry.Xamarin\Sentry.Xamarin.csproj">
+      <Project>{a5329083-a156-47db-a82e-45fb77372aba}</Project>
+      <Name>Sentry.Xamarin</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
