@@ -13,9 +13,13 @@ namespace Sentry
             dotnetSentryClient ?? throw new ArgumentNullException(nameof(dotnetSentryClient));
 
         // TODO: Needs some MWC disposing here?
-        public void Dispose() => (_dotnetSentryClient as IDisposable)?.Dispose();
+        protected override void Dispose(bool disposing)
+        {
+            (_dotnetSentryClient as IDisposable)?.Dispose();
+            base.Dispose(disposing);
+        }
 
-        public IntPtr Handle { get; }
+        // public IntPtr Handle { get; }
         public bool IsEnabled => _dotnetSentryClient.IsEnabled;
 
         public SentryId CaptureEvent(

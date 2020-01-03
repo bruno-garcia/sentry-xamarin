@@ -27,7 +27,7 @@ namespace Sentry.Samples.Xamarin.Android
             // TODO: double check but SDK calls .getApplicationContext so we can pass 'this' here instead.
             SentrySdk.Init(this, o =>
             {
-                o.Dsn = new Dsn("https://bla@sentry.io/123");
+                o.Dsn = new Dsn("https://f7f320d5c3a54709be7b28e0f2ca7081@sentry.io/1808954");
                 o.Debug = true;
                 o.Release = "test-release";
                 o.BeforeSend = @event =>

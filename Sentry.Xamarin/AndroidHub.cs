@@ -19,8 +19,14 @@ namespace Sentry
         {
             // TODO: Call the SentryEvent conversion method
             var javaEvent = new IO.Sentry.Core.SentryEvent();
-//            _androidHub.CaptureEvent(javaEvent, )
-            throw new NotImplementedException();
+            javaEvent.Environment = evt.Environment;
+            if (evt.Level is { })
+            {
+                javaEvent.Level = GetLevel(evt.Level);
+            }
+            Guid id = evt.EventId;
+            javaEvent.EventId = new IO.Sentry.Core.Protocol.SentryId(id.ToString());
+            return _androidHub.CaptureEvent(javaEvent, null) is {} ? evt.EventId : SentryId.Empty;
         }
 
         public Task FlushAsync(TimeSpan timeout)
@@ -44,13 +50,13 @@ namespace Sentry
 //            public ScopeCallback(Action<Scope> callback) =>
 //                _callback = callback ?? throw new ArgumentNullException(nameof(callback));
 
-            public void Dispose()
-            {
-                // TODO: What do I need to dispose here?
-//                throw new NotImplementedException();
-            }
+//             public void Dispose()
+//             {
+//                 // TODO: What do I need to dispose here?
+// //                throw new NotImplementedException();
+//             }
 
-            public IntPtr Handle { get; }
+            // public IntPtr Handle { get; }
 
             public void Run(IO.Sentry.Core.Scope javaScope)
             {
@@ -63,21 +69,21 @@ namespace Sentry
 
                 javaScope.Level = GetLevel(dotnetScope.Level);
                 javaScope.Transaction = dotnetScope.Transaction;
-
-                static IO.Sentry.Core.SentryLevel GetLevel(SentryLevel? nullableLevel)
-                    => nullableLevel is { } level
-                        ? level switch
-                        {
-                            SentryLevel.Debug => IO.Sentry.Core.SentryLevel.Debug,
-                            SentryLevel.Info => IO.Sentry.Core.SentryLevel.Info,
-                            SentryLevel.Warning => IO.Sentry.Core.SentryLevel.Warning,
-                            SentryLevel.Error => IO.Sentry.Core.SentryLevel.Error,
-                            SentryLevel.Fatal => IO.Sentry.Core.SentryLevel.Fatal,
-                            _ => null
-                        }
-                        : null;
             }
         }
+        static IO.Sentry.Core.SentryLevel GetLevel(SentryLevel? nullableLevel)
+            => nullableLevel is { } level
+                ? level switch
+                {
+                    SentryLevel.Debug => IO.Sentry.Core.SentryLevel.Debug,
+                    SentryLevel.Info => IO.Sentry.Core.SentryLevel.Info,
+                    SentryLevel.Warning => IO.Sentry.Core.SentryLevel.Warning,
+                    SentryLevel.Error => IO.Sentry.Core.SentryLevel.Error,
+                    SentryLevel.Fatal => IO.Sentry.Core.SentryLevel.Fatal,
+                    _ => null
+                }
+                : null;
+
 
         public Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
         {

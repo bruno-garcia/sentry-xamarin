@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Android.Content;
+using Java.IO;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
@@ -110,6 +112,26 @@ namespace Sentry
             // AndroidOptionsInitializer would need to be exposed. EventProcessors and Integrations would need to communicate
             // TODO: Interlocked.CompareExchange, [ThreadLocal] and copy on read
             var javaOptions = options.ToJavaAndroidOptions();
+
+            foreach (var externalCacheDir in context.ApplicationContext.GetExternalCacheDirs())
+            {
+                // Happens in: AndroidOptionsInitializer, hack to test it
+                var cacheDir = new Java.IO.File(externalCacheDir, "sentry");
+                cacheDir.Mkdirs();
+                if (javaOptions.CacheDirPath is null && cacheDir.Exists())
+                {
+                    javaOptions.CacheDirPath = cacheDir.AbsolutePath;
+                }
+            }
+
+            if (javaOptions.OutboxPath != null)
+            {
+                new Java.IO.File(javaOptions.OutboxPath, "sentry").Mkdirs();
+            }
+
+            javaOptions.Serializer = new MockSerializer();
+
+
             // This wouldnt need to be done here if AndroidOptionsInitializer was made public
             // All integrations were made internal in the last API review. Could stay like that if we exposed AndroidOptionsInitializer
             // javaOptions.AddIntegration(new IO.Sentry.Android.Core.AnrIntegration());
@@ -123,6 +145,18 @@ namespace Sentry
             Apply(callback.AndroidOptions, javaOptions);
 
             _hub = new AndroidHub(new IO.Sentry.Core.Hub(javaOptions));
+        }
+
+        private class MockSerializer : Object, IO.Sentry.Core.ISerializer
+        {
+            public IO.Sentry.Core.SentryEvent DeserializeEvent(Reader p0)
+            {
+                return new IO.Sentry.Core.SentryEvent();
+            }
+
+            public void Serialize(IO.Sentry.Core.SentryEvent p0, Writer p1)
+            {
+            }
         }
 
         private static void Apply(
@@ -148,12 +182,12 @@ namespace Sentry
             // Need parameterless ctor
 //            public JavaOptionsCallback(SentryAndroidOptions o) => _o = o;
 
-            public void Dispose()
-            {
-                // TODO: needs disposal?
-            }
+            // public void Dispose()
+            // {
+            //     // TODO: needs disposal?
+            // }
 
-            public IntPtr Handle { get; }
+            // public IntPtr Handle { get; }
 
             public void Configure(Object p0)
             {
@@ -188,7 +222,7 @@ namespace Sentry
             javaOptions.AnrEnabled = options.AnrEnabled;
         }
 
-        private class BeforeSendCallback : Object,  IO.Sentry.Core.SentryOptions.IBeforeSendCallback
+        public class BeforeSendCallback : Object,  IO.Sentry.Core.SentryOptions.IBeforeSendCallback
         {
             private
 //                readonly
@@ -200,11 +234,11 @@ namespace Sentry
 //            public BeforeSendCallback(Func<SentryEvent, SentryEvent> callback) =>
 //                _callback = callback ?? throw new ArgumentNullException(nameof(callback));
 
-            public void Dispose()
-            {
-            }
+            // public void Dispose()
+            // {
+            // }
 
-            public IntPtr Handle { get; }
+            // public IntPtr Handle { get; }
 
             // TODO: big problem here are the unknown fields. Since we're newing up things here, they'd be lost on both directions
             public IO.Sentry.Core.SentryEvent Execute(IO.Sentry.Core.SentryEvent originalJavaEvent, Object hint)
